@@ -202,7 +202,7 @@ void ADSWeather::_setBin(unsigned int windVane)
 }
 
 //ISR for rain gauge.
-static void ADSWeather::countRain()
+void ADSWeather::countRain()
 {
 
 	if((long)(micros() - last_micros_rg) >= DEBOUNCE_TIME * 1000)
@@ -215,7 +215,7 @@ static void ADSWeather::countRain()
 }
 
 //ISR for anemometer.
-static void ADSWeather::countAnemometer()
+void ADSWeather::countAnemometer()
 {
 	if((long)(micros() - last_micros_an) >= DEBOUNCE_TIME * 1000)
 	{
