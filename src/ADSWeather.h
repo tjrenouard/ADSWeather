@@ -49,12 +49,17 @@ class ADSWeather
 	static void countRain();
 	static void countAnemometer();
 	static String getVersion(){return ADS_VERSION;};
-	String debugMe();
+	String debugCounters();
+	String debugWindVane();
+	void setDebug(bool fDebug) {_fDebug = fDebug;};
+	bool getDebug() {return _fDebug;};
+	
 	
   private:
 	int _rainPin;
 	int _windDirPin;
 	int _windSpdPin;
+	bool _fDebug;
 	
 	
 	float _rain;
@@ -79,8 +84,7 @@ class ADSWeather
 	
 	void _setBin(unsigned int windVane);
 	static String _debugCounter(String counter_name, int counter);
-	int windDirWeightedAverageCalc_new(int indexStart, int numBins, int max_samples);
-	int windDirWeightedAverageCalc_original(int indexStart, int numBins, int max_samples);
+	int windDirWeightedAverageCalc(int indexStart, int numBins, int max_samples);
 	
 };
 

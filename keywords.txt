@@ -17,4 +17,4 @@ getWindDirection	KEYWORD2
 getWindSpeed		KEYWORD2
 getWindGust			KEYWORD2
 update				KEYWORD2
-debugMe				KEYWORD2
+debugCounters		KEYWORD2

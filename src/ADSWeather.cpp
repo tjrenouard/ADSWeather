@@ -96,7 +96,7 @@ void ADSWeather::update()
 		_rain += _readRainAmount();
 		_windSpd = _readWindSpd();
 		
-		_windDir = _readWindDir();
+		_windDir = _readWindDir(_fDebug);
 
 	}
 }
@@ -148,7 +148,7 @@ float ADSWeather::_readRainAmount()
 
 // Calculate the weighted average of wind vane samples and return degrees for wind direction
 // original code pulled out to experiment with different formulas
-int ADSWeather::windDirWeightedAverageCalc_original(int indexStart, int numBins, int max_samples)
+int ADSWeather::windDirWeightedAverageCalc(int indexStart, int numBins, int max_samples)
 {
 	int sum = 0;
 	int i;
@@ -159,35 +159,6 @@ int ADSWeather::windDirWeightedAverageCalc_original(int indexStart, int numBins,
 	sum = ((indexStart * 45) + ((sum * 45) / max_samples) >> 1) % 360; //Convert into degrees
 	return sum;
 }
-
-// Calculate the weighted average of wind vane samples and return degrees for wind direction
-int ADSWeather::windDirWeightedAverageCalc_new(int indexStart, int numBins, int max_samples)
-{
-	int sum = 0;
-	int i;
-	
-		
-	/**
-		Math - each bucket is a direction and contains the number of samples retrieved in that direction.
-		We're going to average them.  
-		
-		bucket number * 45 degrees = direction
-		Bucket value * degrees = weighted samples
-		max_samples is the number of samples
-		bucket degrees * bucket samples, sum over range of 5 - divided by number of samples
-		
-		
-	**/
-		
- 	for(i=0;i<numBins;i++)
-	{
-		// Number of samples * bin-value-degrees
-		sum += (_windDirBin[(indexStart + i) & 0x0F] * i*45);
-	}
-	sum = sum/max_samples; // Average wind direction
-	
-}
-
 
 
 //Updates the wind direction internal state.
@@ -242,30 +213,36 @@ int ADSWeather::_readWindDir(bool fDebug)
 		WindDirDebugString.concat(max_i);
 		WindDirDebugString.concat(", number of samples = ");
 		WindDirDebugString.concat(max_samples);
-		WindDirDebugString.concat("\n   Sample dump: ");
-		
-		for(j=max_i;j<max_i+5;j++)
+		WindDirDebugString.concat("\n   All Sample dump: \n\t bin: ");
+		for(j=0;j<WINDDIR_BINS;j++)
 		{
-			WindDirDebugString.concat(_windDirBin[(i+j) & 0x0F]);
+			if (j < 10)
+			{
+				WindDirDebugString += '0';
+			}
+			WindDirDebugString += j;
+			WindDirDebugString += ", ";
+		}
+		WindDirDebugString.concat("\n\t val: ");
+		for(j=0;j<WINDDIR_BINS;j++)
+		{
+			if (_windDirBin[j] < 10)
+			{
+				WindDirDebugString += '0';
+			}
+			WindDirDebugString.concat((int)_windDirBin[j]);
 			WindDirDebugString.concat(", ");
 		}
 	}
 
-	sum = windDirWeightedAverageCalc_original(max_i, 5, max_samples);
+	sum = windDirWeightedAverageCalc(max_i, 5, max_samples);
 	
 	if (fDebug)
 	{
-		WindDirDebugString.concat("\n   original calc = ");
+		WindDirDebugString.concat("\n   Wind Direction calc = ");
 		WindDirDebugString.concat(sum);
 	}
 
-	sum = windDirWeightedAverageCalc_new(max_i, 5, max_samples);
-	
-	if (fDebug)
-	{
-		WindDirDebugString.concat("\n   new calc = ");
-		WindDirDebugString.concat(sum);
-	}
 
 	
 	return sum;
@@ -273,13 +250,9 @@ int ADSWeather::_readWindDir(bool fDebug)
 
 
 
-
-
-
-
 //returns the wind speed since the last calcInterval.
 // Assumes calc interval is 1 second
-// TODO - check how gusts are calculated
+// TODO - check how gusts are calculated - there's a bug here - the _gustIdx does not increment
 
 float ADSWeather::_readWindSpd()
 {
@@ -304,6 +277,25 @@ float ADSWeather::_readWindSpd()
 //Internal function for calculating the wind direction using consensus averaging.  
 //The windVane analog values are calculated based on max value of 1024 representing 5v.  
 // See Weather Sensor PDF for spec'd voltage - (voltage/5v)*1024 is expected value
+/* TODO - create mapping to ordinal direction
+index, 	deg, 	direction
+0, 		0, 		"N"
+1, 		22, 	"NNE"
+2, 		45, 	"NE"
+3,			
+4, 		90, 	"E"
+5,		
+6, 		135, 	"SE"
+7, 			
+8, 		180, 	"S"
+9,			
+10,		225, 	"SW"
+11,		 
+12,		270, 	"W"
+13,		 
+14,		315, 	"NW"
+15,
+ */
 void ADSWeather::_setBin(unsigned int windVane)
 {
 	//Read wind directions into bins
@@ -357,19 +349,33 @@ void ADSWeather::countAnemometer()
 
 
 
-String ADSWeather::debugMe()
+String ADSWeather::debugCounters()
 {
-	String debugString = _debugCounter("_anemometerCounter", _anemometerCounter);
-	debugString.concat("\n");
-    debugString.concat(_debugCounter("_rainCounter", _rainCounter));
-	debugString.concat("\n");
-    debugString.concat(_debugCounter("_gustIdx", _gustIdx));
-	debugString.concat("\n");
-    debugString.concat(_debugCounter("_vaneSampleIdx", _vaneSampleIdx));
-	debugString.concat("\n\n");
+	String debugString;
+	if (_fDebug)
+	{
+		debugString = _debugCounter("_anemometerCounter", _anemometerCounter);
+		debugString.concat("\n");
+		debugString.concat(_debugCounter("_rainCounter", _rainCounter));
+		debugString.concat("\n");
+		debugString.concat(_debugCounter("_gustIdx", _gustIdx));
+		debugString.concat("\n");
+	}
+	else
+	{
+		debugString = "debug is off\n";
+	}
 	
   return debugString;
 }
+
+String ADSWeather::debugWindVane()
+{
+	String debugString = String(WindDirDebugString);
+	return debugString;
+}
+
+
 
 String ADSWeather::_debugCounter(String counter_name, int counter)
 {
@@ -377,3 +383,6 @@ String ADSWeather::_debugCounter(String counter_name, int counter)
 	debugString = String(debugString + String(counter));
 	return debugString;
 }
+
+
+
