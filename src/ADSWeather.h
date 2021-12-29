@@ -2,6 +2,8 @@
 ** @file		ADSWeather.cpp
 ** @author		John Cape
 ** @copyright	Argent Data Systems, Inc. - All rights reserved
+** Updated by Julia R
+** Verion 1.2
 **
 ** Argent Data Systems weather station Arduino library.
 ** This library provides a set of functions for interfacing
@@ -22,50 +24,67 @@
 
 #include "Arduino.h"
 
+#define ADS_VERSION "1.2"
+
+#define VANE_SAMPLE_BINS 50
+#define WINDDIR_BINS 16
+#define GUST_BINS 30
+
 
 class ADSWeather
 {
   public:
     ADSWeather(int rainPin, int windDirPin, int windSpdPin);
     
-	int getRain();
-	int getWindDirection();
-	int getWindSpeed();
-	int getWindGust();
+	float getRain(); // returns millimeters
+	int getWindDirection(); // returns degrees
+	float getWindSpeed(); // returns kmph
+	float getWindGust(); // returns kmph
+	
 	
 	void update();
+	void resetWindGust(); // reset the wind gust value
+	void resetRain(); //reset the rain value
 	
 	static void countRain();
 	static void countAnemometer();
-
+	static String getVersion(){return ADS_VERSION;};
+	String debugCounters();
+	String debugWindVane();
+	void setDebug(bool fDebug) {_fDebug = fDebug;};
+	bool getDebug() {return _fDebug;};
+	
 	
   private:
 	int _rainPin;
 	int _windDirPin;
 	int _windSpdPin;
+	bool _fDebug;
 	
 	
-	int _rain;
+	float _rain;
 	int _windDir;
-	int _windSpd;
-	int _windSpdMax;
+	float _windSpd;
+	float _windSpdMax;
 	
 	unsigned long _nextCalc;
 	unsigned long _timer;
   	
-	unsigned int _vaneSample[50]; //50 samples from the sensor for consensus averaging
+	unsigned int _vaneSample[VANE_SAMPLE_BINS]; //50 samples from the sensor for consensus averaging
 	unsigned int _vaneSampleIdx;
-	unsigned int _windDirBin[16];
+	unsigned int _windDirBin[WINDDIR_BINS];
 	
-	unsigned int _gust[30]; //Array of 50 wind speed values to calculate maximum gust speed.
+	unsigned int _gust[GUST_BINS]; //Array of 30 wind speed values to calculate maximum gust speed.
 	unsigned int _gustIdx;
 	
-	int _readRainAmmount();
-    int _readWindDir();
-    int _readWindSpd();
+	float _readRainAmount();
+    int _readWindDir(bool fDebug = false);
+    float _readWindSpd();
 	
 	
 	void _setBin(unsigned int windVane);
+	static String _debugCounter(String counter_name, int counter);
+	int windDirWeightedAverageCalc(int indexStart, int numBins, int max_samples);
 	
 };
 
