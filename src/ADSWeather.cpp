@@ -256,9 +256,9 @@ int ADSWeather::_readWindDir(bool fDebug)
 
 
 
-//returns the wind speed since the last calcInterval.
+// returns the wind speed since the last calcInterval.
 // Assumes calc interval is 1 second
-// TODO - check how gusts are calculated - there's a bug here - the _gustIdx does not increment
+// _windSpdMax is persistent - recommend calling function reset this periodically at whatever interval you want.
 
 float ADSWeather::_readWindSpd()
 {
@@ -270,7 +270,7 @@ float ADSWeather::_readWindSpd()
 	{
 		_gustIdx = 0;
 	}
-	_gust[_gustIdx] = (int) spd;
+	_gust[_gustIdx++] = (int) spd;
 
 	for (i = 0; i < 30; i++)
 	{
@@ -369,7 +369,7 @@ String ADSWeather::debugCounters()
 	}
 	else
 	{
-		debugString = "debug is off\n";
+		debugString = "";
 	}
 	
   return debugString;
