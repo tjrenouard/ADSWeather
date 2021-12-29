@@ -2,13 +2,27 @@
 ** @file    weatherStation.ino
 ** @author    John Cape
 ** @copyright Argent Data Systems, Inc. - All rights reserved
-**
+** Updated by Julia Renouard to use updated library - @tjrenouard
 ** Example code for using the ADSWeather weather station interface library.
 ** This code shows how to setup and interface with the anemometer, wind vane, and rain gauge 
 ** found in the Argent Data Systems weather station.
 ** 
 ** The anemometer and the rain gauge each require a digital input pin that can be used as an interrupt
 ** The wind vane requires an analog input pin.
+** 
+** If interfacing directly from RJ11 to Arduino - I've copied the notes from ADSWeather.cpp
+** Argent Data Systems weather station Arduino library.
+** This library provides a set of functions for interfacing
+** with the Argent Data Systesm weather station sensor package
+** These sensors consist of a rain gauge, a wind vane and an
+** anemometer. The anemometer and the rain gauge should be 
+** connected to digital input pins on one side and ground on
+** the other. The weather vane is a variable resistor. 
+** It should be connected to an analog input pin on one side
+** and ground on the other. The analog input pin needs to be 
+** connected to 5V from the Arduion through a 10K Ohm resistor.
+
+
 **/
 
  
@@ -58,26 +72,20 @@ void loop() {
     windDirection = ws1.getWindDirection();
     windGust = ws1.getWindGust();
 
-//     windSpeed / 10 will give the interger component of the wind speed
-//     windSpeed % 10 will give the fractional component of the wind speed
     Serial.print("Wind speed: ");
-    Serial.print(windSpeed / 10);
-    Serial.print('.');
-    Serial.print(windSpeed % 10);
-    Serial.print(" ");
+    Serial.print(windSpeed);
+
 
     Serial.print("Gusting at: ");
-    Serial.print(windGust / 10);
-    Serial.print('.');
-    Serial.print(windGust % 10);
-    Serial.println("");
+    Serial.print(windGust);
+
 
     Serial.print("Wind Direction: ");
     Serial.print(windDirection);
     Serial.println("");
 
     Serial.print("Total Rain: ");
-    Serial.println((float) rainAmmount / 1000);
+    Serial.println((float) rainAmmount);
     
   }
 }
