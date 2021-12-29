@@ -24,9 +24,9 @@
 
 #include "Arduino.h"
 
-#define ADS_VERSION "1.2"
+#define ADS_VERSION "2.0"
 
-#define VANE_SAMPLE_BINS 50
+#define VANE_SAMPLE_BINS 30
 #define WINDDIR_BINS 16
 #define GUST_BINS 30
 
