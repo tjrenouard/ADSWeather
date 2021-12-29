@@ -4,6 +4,8 @@
 ** @copyright	Argent Data Systems, Inc. - All rights reserved
 ** @maintainer  tjrenouard
 **
+
+ * Forked from ADSWeather library v0.1.1 - https://github.com/rahife/ADSWeather
 ** Argent Data Systems weather station Arduino library.
 ** This library provides a set of functions for interfacing
 ** with the Argent Data Systesm weather station sensor package
@@ -15,7 +17,6 @@
 ** and ground on the other. The analog input pin needs to be 
 ** connected to 5V from the Arduion through a 10K Ohm resistor.
 ** 
-** Update - for using a SwitchDoc RJ11->Grove adapter and a Arduino Grove shield, I'm not using the 10K Ohm resistor - see example
 **
 **
  * Specs from data sheet:
@@ -184,6 +185,10 @@ int ADSWeather::_readWindDir(bool fDebug)
 	{
 		WindDirDebugString = String("_readWindDir() debug\n");
 	}
+	else
+	{
+		WindDirDebugString = String("");
+	}
 	
 	
 	//Calculate the weighted average
@@ -234,6 +239,7 @@ int ADSWeather::_readWindDir(bool fDebug)
 			WindDirDebugString.concat(", ");
 		}
 	}
+
 
 	sum = windDirWeightedAverageCalc(max_i, 5, max_samples);
 	
