@@ -1,4 +1,4 @@
-#Contributing Guidelines
+# Contributing Guidelines
 
 :+1::tada: First off, thanks for taking the time to participate! :tada::+1:
 
