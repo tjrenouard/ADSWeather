@@ -46,11 +46,11 @@ volatile int _rainCounter;
 volatile unsigned long last_micros_rg;
 volatile unsigned long last_micros_an;
 
-const float RainMultiplier_mm = 0.2794; // .2794mm per tip (see specs)
-const float AnemometerMultiplier_kmph = 2.4; // 1 count per sec = 2.4 kmph
+#define RAIN_FACTOR_MM 0.2794 // .2794mm per tip (see specs)
+#define ANEMOMETER_FACTOR_KMPH 2.4 // 1 count per sec = 2.4 kmph
 
 
-String WindDirDebugString;
+//String WindDirDebugString;
 
 
 
@@ -142,7 +142,7 @@ void ADSWeather::resetWindGust()
 float ADSWeather::_readRainAmount()
 {
 	float rain = 0;
-	rain = RainMultiplier_mm * _rainCounter;
+	rain = RAIN_FACTOR_MM * _rainCounter;
 	_rainCounter = 0;
 	return rain;
 } 
@@ -181,14 +181,14 @@ int ADSWeather::_readWindDir(bool fDebug)
 	}
 	
 	
-	if (fDebug)
+	/* if (fDebug)
 	{
 		WindDirDebugString = String("_readWindDir() debug\n");
 	}
 	else
 	{
 		WindDirDebugString = String("");
-	}
+	} */
 	
 	
 	//Calculate the weighted average
@@ -212,7 +212,7 @@ int ADSWeather::_readWindDir(bool fDebug)
 			max_i = i;
 		}
 	}
-	if (fDebug)
+	/* if (fDebug)
 	{
 		WindDirDebugString.concat("Found largest sample set at index = ");
 		WindDirDebugString.concat(max_i);
@@ -237,17 +237,17 @@ int ADSWeather::_readWindDir(bool fDebug)
 			}
 			WindDirDebugString.concat((int)_windDirBin[j]);
 			WindDirDebugString.concat(", ");
-		}
-	}
+		} 
+	}*/
 
 
 	sum = windDirWeightedAverageCalc(max_i, 5, max_samples);
 	
-	if (fDebug)
+/* 	if (fDebug)
 	{
 		WindDirDebugString.concat("\n   Wind Direction calc = ");
 		WindDirDebugString.concat(sum);
-	}
+	} */
 
 
 	
@@ -264,15 +264,15 @@ float ADSWeather::_readWindSpd()
 {
 	unsigned char i;
 	
-	float spd = _anemometerCounter*AnemometerMultiplier_kmph;
+	float spd = _anemometerCounter*ANEMOMETER_FACTOR_KMPH;
 	_anemometerCounter = 0;
-	if(_gustIdx > 29)
+	if(_gustIdx >= GUST_BINS)
 	{
 		_gustIdx = 0;
 	}
 	_gust[_gustIdx++] = (int) spd;
 
-	for (i = 0; i < 30; i++)
+	for (i = 0; i < GUST_BINS; i++)
 	{
 		if (_gust[i] > _windSpdMax) _windSpdMax = _gust[i];	
 	}
@@ -377,7 +377,8 @@ String ADSWeather::debugCounters()
 
 String ADSWeather::debugWindVane()
 {
-	String debugString = String(WindDirDebugString);
+	//String debugString = String(WindDirDebugString);
+	String debugString = String("Debug disabled");
 	return debugString;
 }
 
