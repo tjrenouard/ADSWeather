@@ -97,7 +97,7 @@ void ADSWeather::update()
 		_rain += _readRainAmount();
 		_windSpd = _readWindSpd();
 		
-		_windDir = _readWindDir(_fDebug);
+		_windDir = _readWindDir();
 
 	}
 }
@@ -163,7 +163,7 @@ int ADSWeather::windDirWeightedAverageCalc(int indexStart, int numBins, int max_
 
 
 //Updates the wind direction internal state.
-int ADSWeather::_readWindDir(bool fDebug)
+int ADSWeather::_readWindDir()
 {
 	unsigned int max_samples, sum;
 	unsigned char i, j, max_i;
@@ -179,16 +179,6 @@ int ADSWeather::_readWindDir(bool fDebug)
 	{
 		_setBin(_vaneSample[i]);
 	}
-	
-	
-	/* if (fDebug)
-	{
-		WindDirDebugString = String("_readWindDir() debug\n");
-	}
-	else
-	{
-		WindDirDebugString = String("");
-	} */
 	
 	
 	//Calculate the weighted average
@@ -212,42 +202,8 @@ int ADSWeather::_readWindDir(bool fDebug)
 			max_i = i;
 		}
 	}
-	/* if (fDebug)
-	{
-		WindDirDebugString.concat("Found largest sample set at index = ");
-		WindDirDebugString.concat(max_i);
-		WindDirDebugString.concat(", number of samples = ");
-		WindDirDebugString.concat(max_samples);
-		WindDirDebugString.concat("\n   All Sample dump: \n\t bin: ");
-		for(j=0;j<WINDDIR_BINS;j++)
-		{
-			if (j < 10)
-			{
-				WindDirDebugString += '0';
-			}
-			WindDirDebugString += j;
-			WindDirDebugString += ", ";
-		}
-		WindDirDebugString.concat("\n\t val: ");
-		for(j=0;j<WINDDIR_BINS;j++)
-		{
-			if (_windDirBin[j] < 10)
-			{
-				WindDirDebugString += '0';
-			}
-			WindDirDebugString.concat((int)_windDirBin[j]);
-			WindDirDebugString.concat(", ");
-		} 
-	}*/
-
 
 	sum = windDirWeightedAverageCalc(max_i, 5, max_samples);
-	
-/* 	if (fDebug)
-	{
-		WindDirDebugString.concat("\n   Wind Direction calc = ");
-		WindDirDebugString.concat(sum);
-	} */
 
 
 	
@@ -280,11 +236,9 @@ float ADSWeather::_readWindSpd()
 }
 
 
-//Internal function for calculating the wind direction using consensus averaging.  
 //The windVane analog values are calculated based on max value of 1024 representing 5v.  
 // See Weather Sensor PDF for spec'd voltage - (voltage/5v)*1024 is expected value
-/* TODO - create mapping to ordinal direction
-index, 	deg, 	direction
+/* index, 	deg, 	direction
 0, 		0, 		"N"
 1, 		22, 	"NNE"
 2, 		45, 	"NE"
@@ -301,7 +255,7 @@ index, 	deg, 	direction
 13,		 
 14,		315, 	"NW"
 15,
- */
+ */ 
 void ADSWeather::_setBin(unsigned int windVane)
 {
 	//Read wind directions into bins
@@ -353,43 +307,6 @@ void ADSWeather::countAnemometer()
 	}
 }
 
-
-
-String ADSWeather::debugCounters()
-{
-	String debugString;
-	if (_fDebug)
-	{
-		debugString = _debugCounter("_anemometerCounter", _anemometerCounter);
-		debugString.concat("\n");
-		debugString.concat(_debugCounter("_rainCounter", _rainCounter));
-		debugString.concat("\n");
-		debugString.concat(_debugCounter("_gustIdx", _gustIdx));
-		debugString.concat("\n");
-	}
-	else
-	{
-		debugString = "";
-	}
-	
-  return debugString;
-}
-
-String ADSWeather::debugWindVane()
-{
-	//String debugString = String(WindDirDebugString);
-	String debugString = String("Debug disabled");
-	return debugString;
-}
-
-
-
-String ADSWeather::_debugCounter(String counter_name, int counter)
-{
-	String debugString = "ADSWeather:: " + counter_name + "= ";
-	debugString = String(debugString + String(counter));
-	return debugString;
-}
 
 
 

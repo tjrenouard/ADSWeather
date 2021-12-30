@@ -24,7 +24,7 @@
 
 #include "Arduino.h"
 
-#define ADS_VERSION "2.0"
+#define ADS_VERSION "2.1"
 
 #define VANE_SAMPLE_BINS 30
 #define WINDDIR_BINS 16
@@ -49,18 +49,12 @@ class ADSWeather
 	static void countRain();
 	static void countAnemometer();
 	static String getVersion(){return ADS_VERSION;};
-	String debugCounters();
-	String debugWindVane();
-	void setDebug(bool fDebug) {_fDebug = fDebug;};
-	bool getDebug() {return _fDebug;};
-	
+
 	
   private:
 	int _rainPin;
 	int _windDirPin;
 	int _windSpdPin;
-	bool _fDebug;
-	
 	
 	float _rain;
 	int _windDir;
@@ -78,12 +72,11 @@ class ADSWeather
 	unsigned int _gustIdx;
 	
 	float _readRainAmount();
-    int _readWindDir(bool fDebug = false);
+    int _readWindDir();
     float _readWindSpd();
 	
 	
 	void _setBin(unsigned int windVane);
-	static String _debugCounter(String counter_name, int counter);
 	int windDirWeightedAverageCalc(int indexStart, int numBins, int max_samples);
 	
 };
